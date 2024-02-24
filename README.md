@@ -2,8 +2,16 @@
 
 ## Compiling 
 
+Note: Uses [GNU Readline Library](https://tiswww.case.edu/php/chet/readline/readline.html)
+
 `cmake CMakeLists.txt`
+
 `cmake --build .`
+
+
+## Running 
+
+`MISH [scriptFile]`
 
 ## Additional features
 

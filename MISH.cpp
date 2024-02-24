@@ -72,7 +72,7 @@ int execute(vector<vector<Command>> commands, bool skipwait)
         for (size_t j = 0; j < commands[i].size(); j++)
         {
             // built in commands
-            if (commands[i][j].command == "cd" || commands[i][j].command == "exit" || commands[i][j].command == "alias" || (commands[i][j].args.size() > 1 && commands[i][j].args[1] == "="))
+            if (commands[i][j].command == "cd" || commands[i][j].command == "exit" || commands[i][j].command == "alias" || commands[i][j].command == "=")
             {
                 if (commands[i].size() > 1)
                 {
@@ -249,6 +249,7 @@ int parse(char* inputChars)
             auto inputRedirSep = split(pipeSeparated.at(j), "<");
             auto outputRedirSep = split(pipeSeparated.at(j), ">");
             auto inputOutputRedirSep = split(pipeSeparated.at(j), "<>");
+            auto equalSep = split(pipeSeparated.at(j), "=");
 
             // now create "tokens" based on whitespace
             cmd.args = split(inputOutputRedirSep.at(0), whitespace);
@@ -280,6 +281,26 @@ int parse(char* inputChars)
             {
                 cout << "Error: Invalid format: Too many input / output redirects: " << pipeSeparated.at(j) << endl;
                 return -1;
+            }
+            // envireonment assignment
+            else if (equalSep.size() > 1)
+            {
+                if (equalSep.size() != 2)
+                {
+                    cout << "Error: Invalid format: Too many =: " << pipeSeparated.at(j) << endl;
+                    return -1;
+                }
+                auto trimmedVar = split(equalSep[0], whitespace);
+                if (trimmedVar.size() != 1)
+                {
+                    cout << "Error: Invalid envronment assignment var: \"" << equalSep[0] << "\"" << endl;
+                    return -1;
+                }
+                equalSep[0] = trimmedVar[0];
+                cmd.args = equalSep;
+                cmd.command = "=";
+
+                npcommand.push_back(cmd);
             }
             else
             {
@@ -461,9 +482,9 @@ int runBuiltIn(Command cmd)
         aliasMap.insert_or_assign(cmd.args[1], alias);
     }
     // environment assignment
-    else if (cmd.args[1] == "=")
+    else if (cmd.command == "=")
     {
-        if (cmd.args.size() != 3)
+        if (cmd.args.size() != 2)
         {
             cout << "Error: environment assignment - invalid number of arguments" << endl;
             return -1;
@@ -474,7 +495,7 @@ int runBuiltIn(Command cmd)
             return -1;
         }
 
-        int res = setenv(cmd.args[0].c_str(), cmd.args[2].c_str(), 1);
+        int res = setenv(cmd.args[0].c_str(), cmd.args[1].c_str(), 1);
         if (res < 0)
         {
             perror("Error: Cannot set environment variable");
