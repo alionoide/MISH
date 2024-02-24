@@ -2,6 +2,7 @@
 
 using namespace std;
 
+// This function will split a sting on character delimiters
 vector<string> split(string input, string delims)
 {
     vector<string> res;
@@ -13,6 +14,7 @@ vector<string> split(string input, string delims)
             if (input.at(i) == delims.at(j))
             {
                 string sub = input.substr(lastpos, i - lastpos);
+                // Ignore zero length strings
                 if (sub.length() > 0)
                 {
                     res.push_back(sub);
@@ -21,6 +23,7 @@ vector<string> split(string input, string delims)
             }
         }
     }
+    // add the last item
     string sub = input.substr(lastpos);
     if (sub.length() > 0)
     {
